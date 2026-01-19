@@ -7,6 +7,8 @@ const User = require('../models/User.model');
 const { generateUserToken, setTokenCookie, clearTokenCookie } = require('../utils/jwt');
 const { sendSuccess, sendCreated, sendError } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const bcrypt = require("bcryptjs");
+
 
 /**
  * @desc    Register a new user
