@@ -103,22 +103,15 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 
-// Pre-save Hook: Hash password before saving
-userSchema.pre('save', async function (next) {
-  // Only hash password if it's modified (or new)
-  if (!this.isModified('password')) {
-    return next();
-  }
 
-  try {
-    // Generate salt and hash password
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
+userSchema.pre("save", async function () {
+  // Only hash if password changed
+  if (!this.isModified("password")) return;
+
+  const salt = await bcrypt.genSalt(12);
+  this.password = await bcrypt.hash(this.password, salt);
 });
+
 
 // Instance Methods
 

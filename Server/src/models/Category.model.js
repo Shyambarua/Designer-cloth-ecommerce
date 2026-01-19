@@ -92,14 +92,15 @@ categorySchema.virtual('productCount', {
 // Pre-save Hook
 
 // Generate slug from name
-categorySchema.pre('save', function (next) {
-  if (this.isModified('name') && !this.slug) {
-    this.slug = this.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  }
-  next();
+categorySchema.pre("save", async function () {
+  // Only generate slug when name is new/updated
+  if (!this.isModified("name")) return;
+
+  this.slug = this.name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 });
 
 // Static Methods

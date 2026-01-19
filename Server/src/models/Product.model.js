@@ -247,26 +247,37 @@ productSchema.virtual('primaryImage').get(function () {
 // Pre-save Hooks
 
 // Generate slug from name
-productSchema.pre('save', function (next) {
-  if (this.isModified('name') && !this.slug) {
+productSchema.pre('save', function () {
+  // Generate slug from name
+  if (this.isModified('name')) {
     this.slug = this.name
       .toLowerCase()
+      .trim()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
   }
-  
+
   // Calculate total stock from variants
-  if (this.variants && this.variants.length > 0) {
-    this.totalStock = this.variants.reduce((sum, variant) => sum + variant.stock, 0);
+  if (Array.isArray(this.variants) && this.variants.length > 0) {
+    this.totalStock = this.variants.reduce(
+      (sum, variant) => sum + (variant.stock || 0),
+      0
+    );
+  } else {
+    // if no variants, keep totalStock as it is OR default to 0
+    this.totalStock = this.totalStock || 0;
   }
-  
-  // Calculate discount percentage if sale price exists
-  if (this.salePrice && this.price) {
-    this.discountPercent = Math.round(((this.price - this.salePrice) / this.price) * 100);
+
+  // Calculate discount percentage if salePrice exists
+  if (this.salePrice && this.price && this.salePrice < this.price) {
+    this.discountPercent = Math.round(
+      ((this.price - this.salePrice) / this.price) * 100
+    );
+  } else {
+    this.discountPercent = 0;
   }
-  
-  next();
 });
+
 
 // Static Methods
 
